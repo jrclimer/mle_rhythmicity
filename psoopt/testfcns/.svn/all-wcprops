@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns
+END
+testfcn1.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/testfcn1.m
+END
+griewangksfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/griewangksfcn.m
+END
+schwefelsfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/schwefelsfcn.m
+END
+binarytestfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/binarytestfcn.m
+END
+langermannsfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/langermannsfcn.m
+END
+rastriginsfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/rastriginsfcn.m
+END
+dropwavefcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/dropwavefcn.m
+END
+dejongsfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/dejongsfcn.m
+END
+rosenbrocksfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/rosenbrocksfcn.m
+END
+ackleysfcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/ackleysfcn.m
+END
+templatefcn.m
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/templatefcn.m
+END
+nonlinearconstrdemo.m
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/repos/!svn/ver/5230/jrclimer/mle_rhythmicity_fast/psoopt/testfcns/nonlinearconstrdemo.m
+END
