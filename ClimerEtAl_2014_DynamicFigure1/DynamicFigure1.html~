@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Dynamic Figure 1: Climer et al, 2014</title>
+<script type="text/javascript">
+// JavaScript source code goes here
+function yscale(x) {
+	var canvas = document.getElementById("canvas");
+	return ((canvas.height-50)/(canvas.width-50)*0.6)/2*x;
+}
+
+function absyscale(x) {
+	var canvas = document.getElementById("canvas");
+	return canvas.height-(canvas.height-50)/2*x-50;
+}
+
+function drawvalue(tau,b,c,f,s,r) {
+	function funb(x) {
+		return yscale((x/x)*b);
+	}	
+	function funtau(x) {
+		return yscale((1-b)*Math.exp(-x/Math.pow(10,tau))+b);
+	}
+	function funlb(x) {
+		return 	yscale((1-b)*Math.exp(-x/Math.pow(10,tau))+b-(1-b)*Math.exp(-x/Math.pow(10,tau))*r*Math.exp(-x/Math.pow(10,c)));
+	}
+	function funub(x) {
+		return 	yscale((1-b)*Math.exp(-x/Math.pow(10,tau))+b+(1-b)*Math.exp(-x/Math.pow(10,tau))*r*Math.exp(-x/Math.pow(10,c)));
+	}
+	function funps(x){
+		return yscale((1-b)*Math.exp(-x/Math.pow(10,tau))*(r*Math.exp(-x/Math.pow(10,c))*Math.cos(2*Math.PI*f*x)+1)+b);
+	}
+	function funs(x){
+	 if (s==0){
+		return yscale((1-b)*Math.exp(-x/Math.pow(10,tau))*(r*Math.exp(-x/Math.pow(10,c))*Math.cos(2*Math.PI*f*x)+1)+b);
+	} else {
+		return yscale((1-b)*Math.exp(-x/Math.pow(10,tau))*(r*Math.exp(-x/Math.pow(10,c))*(2-2*Math.sqrt(1-s)-3*s+4*s*Math.cos(Math.PI*f*x)+(2+2*Math.sqrt(1-s)-s)*Math.cos(2*Math.PI*f*x))/4+1)+b);
+	}
+	}
+	
+	var canvas = document.getElementById("canvas");
+	 if (null==canvas || !canvas.getContext) return;
+
+	 var axes={}, ctx=canvas.getContext("2d");
+	 axes.x0 = 50;  // x0 pixels from left to x=0
+	 axes.y0 = canvas.height-50; // y0 pixels from top to y=0
+	 axes.scale = (canvas.width-50)/0.6;
+
+	 showAxes(ctx,axes);
+	 funGraph(ctx,axes,funb,"rgb(100,100,100)",1,[5]);
+	 funGraph(ctx,axes,funtau,"rgb(255,0,0)",1,[]);
+	 funGraph(ctx,axes,funlb,"rgb(0,0,255)",1,[5]);
+	 funGraph(ctx,axes,funub,"rgb(0,0,255)",1,[5]);
+	 funGraph(ctx,axes,funps,"rgb(0,0,255)",1,[]);
+	 funGraph(ctx,axes,funs,"rgb(0,0,0)",5,[]);
+	 ctx.font="18px Arial";
+	 ctx.fillStyle="#646464";
+	 ctx.fillText("b",35,absyscale(b)+8);
+}
+
+
+function draw() {
+ drawvalue(Math.log(0.3)/Math.log(10),0.2,2,8,0,0);
+}
+
+function funGraph (ctx,axes,func,color,thick,dashed) {
+ var xx, yy, dx=4, x0=axes.x0, y0=axes.y0, scale=axes.scale;
+ var iMax = Math.round((ctx.canvas.width-x0)/dx);
+ var iMin = 0;
+ ctx.beginPath();
+ ctx.lineWidth = thick;
+ ctx.strokeStyle = color;
+ if (!ctx.setLineDash) {
+ 	ctx.setLineDash = function () {}
+ }
+ ctx.setLineDash(dashed);
+
+ for (var i=iMin;i<=iMax;i++) {
+  xx = dx*i; yy = scale*func(xx/scale);
+  if (i==iMin) ctx.moveTo(x0+xx,y0-yy);
+  else         ctx.lineTo(x0+xx,y0-yy);
+ }
+ ctx.stroke();
+}
+
+function showAxes(ctx,axes) {
+ var x0=axes.x0, w=ctx.canvas.width;
+ var y0=axes.y0, h=ctx.canvas.height;
+ var xmin = axes.doNegativeX ? 0 : x0;
+ ctx.beginPath();
+ ctx.strokeStyle = "rgb(0,0,0)"; 
+ ctx.setLineDash([]);
+ ctx.lineWidth = 1;
+ ctx.moveTo(xmin,y0); ctx.lineTo(w,y0);  // X axis
+ ctx.moveTo(x0,0);    ctx.lineTo(x0,h);  // Y axis
+ ctx.stroke();
+ 
+ ctx.fillStyle = "rgb(0,0,0)";
+ ctx.font="18px Arial";
+ ctx.fillText("0",35,absyscale(0)+8);
+ ctx.fillText("1",35,absyscale(1)+8);
+ ctx.fillText("2",35,absyscale(1.9)+8);
+ 
+ var metric = ctx.measureText("Norm. Likelihood");
+ ctx.save();
+ var tx = -40+(metric.width/2);
+ var ty = absyscale(1);
+ ctx.translate(tx,ty);
+ ctx.rotate(-Math.PI/2);
+ ctx.translate(-tx,-ty);
+ ctx.fillText("Norm. Likelihood",-40,absyscale(1));
+ ctx.restore();
+ 
+ metric = ctx.measureText("0.3");
+ ctx.fillText("0.3",50+(600-50)/2-metric.width/2,absyscale(-0.15));
+ ctx.fillText("0.6",600-metric.width,absyscale(-0.15));
+ 
+ metric = ctx.measureText("Lag (s)");
+ ctx.fillText("Lag (s)",50+(600-50)/2-metric.width/2,absyscale(-0.3));
+}
+</script>
+</head>
+<body onload="draw()">
+
+<canvas id="canvas" width="600" height="300"></canvas>
+
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/dhtmlxSlider/codebase/dhtmlxslider.css?build=100722">
+<script src="dhtmlxSlider/dhtmlxSlider/codebase/dhtmlxcommon.js?build=100722" type="text/javascript"></script>
+<script src="dhtmlxSlider/dhtmlxSlider/codebase/dhtmlxslider.js?build=100722" type="text/javascript"></script>
+<script>
+
+var slider_tau;
+var slider_b;
+var slider_c;
+var slider_r;
+var slider_f;
+var slider_s;
+
+var slider_a;
+
+function redraw(){
+	 var canvas = document.getElementById("canvas");
+	 var context = canvas.getContext('2d');
+	 context.save();
+	 context.setTransform(1,0,0,1,0,0);
+	 context.clearRect(0,0,canvas.width,canvas.height);
+	 context.restore();
+	
+	drawvalue(slider_tau.getValue(),slider_b.getValue(),slider_c.getValue(),slider_f.getValue(),slider_s.getValue(),slider_r.getValue());	
+}
+
+function jr(){
+	slider_tau=new dhtmlxSlider("tau_sliderBox",260,"dhx_skyblue");
+	slider_tau.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_tau.setStep(0.05);
+	slider_tau.setMin(-2);
+	slider_tau.setMax(2);
+	slider_tau.setValue(Math.log(0.3)/Math.log(10));
+	slider_tau.attachEvent("onChange",function(nv){document.getElementById("tau_value").value=nv;redraw();});
+	document.getElementById("tau_value").value=slider_tau.value;
+	slider_tau.init();
+	
+	slider_b=new dhtmlxSlider("b_sliderBox",260,"dhx_skyblue");
+	slider_b.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_b.setStep(0.01);
+	slider_b.setMin(0);
+	slider_b.setMax(1);
+	slider_b.setValue(0.2);
+	slider_b.attachEvent("onChange",function(nv){
+		document.getElementById("b_value").value=nv;
+		slider_a.setValue((1-slider_b.getValue())*slider_r.getValue());
+		document.getElementById("a_value").value=(1-slider_b.getValue())*slider_r.getValue();
+		redraw();
+	});
+	document.getElementById("b_value").value=slider_b.value;
+	slider_b.init();
+	
+	slider_c=new dhtmlxSlider("c_sliderBox",260,"dhx_skyblue");
+	slider_c.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_c.setStep(0.05);
+	slider_c.setMin(-2);
+	slider_c.setMax(2);
+	slider_c.setValue(2);
+	slider_c.attachEvent("onChange",function(nv){document.getElementById("c_value").value=nv;redraw();});
+	document.getElementById("c_value").value=slider_c.value;
+	slider_c.init();
+	
+	slider_r=new dhtmlxSlider("r_sliderBox",260,"dhx_skyblue");
+	slider_r.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_r.setStep(0.01);
+	slider_r.setMin(0);
+	slider_r.setMax(1);
+	slider_r.setValue(0);
+	slider_r.attachEvent("onChange",function(nv){
+		document.getElementById("r_value").value=nv;
+		slider_a.setValue((1-slider_b.getValue())*slider_r.getValue());
+		document.getElementById("a_value").value=(1-slider_b.getValue())*slider_r.getValue();
+		redraw();
+	});
+	document.getElementById("r_value").value=slider_r.value;
+	slider_r.init();
+	
+	slider_f=new dhtmlxSlider("f_sliderBox",260,"dhx_skyblue");
+	slider_f.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_f.setStep(0.01);
+	slider_f.setMin(2);
+	slider_f.setValue(8);
+	slider_f.attachEvent("onChange",function(nv){document.getElementById("f_value").value=nv;redraw();});
+	document.getElementById("f_value").value=slider_f.value;
+	slider_f.init();
+	
+	slider_s=new dhtmlxSlider("s_sliderBox",260,"dhx_skyblue");
+	slider_s.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_s.setStep(0.01);
+	slider_s.setMin(0);
+	slider_s.setMax(1);
+	slider_s.setValue(0);
+	slider_s.attachEvent("onChange",function(nv){document.getElementById("s_value").value=nv;redraw();});
+	document.getElementById("s_value").value=slider_s.value;
+	slider_s.init();
+	
+	slider_a=new dhtmlxSlider("a_sliderBox",260,"dhx_skyblue");
+	slider_a.setImagePath("dhtmlxSlider/dhtmlxSlider/codebase/imgs/");
+	slider_a.setStep(0.01);
+	slider_a.setMin(0);
+	slider_a.setMax(1);
+	slider_a.setValue(0);
+	slider_a.attachEvent("onChange",function(nv){
+		document.getElementById("a_value").value=nv;
+		
+		slider_r.setValue(Math.min(slider_a.getValue()/(1-slider_b.getValue()),1));
+		if (slider_a.getValue()>(1-slider_b.getValue())){
+			slider_b.setValue(1-slider_a.getValue());	
+		}
+		
+		redraw();
+	});
+	document.getElementById("a_value").value=slider_a.value;
+	slider_a.init();
+};
+		
+		dhtmlxEvent(window,"load",jr);</script> 
+
+<div style="position:relative;margin-bottom:10px;">
+
+<div width="600px" height="283px" id="gridbox" style="width:600px;height:280px;position:absolute;top:0px;left:0px">
+
+
+<table width="600">
+  <col width="100">
+  <col width="300">
+  <col width="100">  
+    <tr>
+    <td><font color="Red">&#964, falloff (log10(sec))</font></td>
+    <td><div id="tau_sliderBox"></div></td>
+    <td><input type="text" id="tau_value" style="width:37px;font-size:12px;" value="0" onchange="slider_tau.setValue(this.value);this.value = slider_tau.getValue();redraw();">
+</td>
+  <tr>
+    <td><font color="#646464">b, baseline</font></td>
+    <td><div id="b_sliderBox"></div></td>
+    <td><input type="text" id="b_value" style="width:37px;font-size:12px;" value="0" onchange=
+    "slider_b.setValue(this.value);
+    this.value = slider_b.getValue();
+    redraw();">
+</td>
+  </tr>
+  <tr>
+    <td><font color="Blue">c, rhyth falloff (log10(sec))</font></td>
+    <td><div id="c_sliderBox"></div></td>
+    <td><input type="text" id="c_value" style="width:37px;font-size:12px;" value="0" onchange="slider_c.setValue(this.value);this.value = slider_c.getValue();redraw();">
+</td>
+  </tr>
+   <tr>
+    <td><font color="Blue">f, frequency (Hz)</font></td>
+    <td><div id="f_sliderBox"></div></td>
+    <td><input type="text" id="f_value" style="width:37px;font-size:12px;" value="0" onchange="slider_r.setValue(this.value);this.value = slider_r.getValue();redraw();">
+</td>
+  </tr>
+  <tr>
+    <td><font color="Black">s, skipping</font></td>
+    <td><div id="s_sliderBox"></div></td>
+    <td><input type="text" id="s_value" style="width:37px;font-size:12px;" value="0" onchange="slider_s.setValue(this.value);this.value = slider_s.getValue();redraw();">
+</td>
+  </tr>
+  <tr>
+    <td><font color="Blue">r, rhythm</font></td>
+    <td><div id="r_sliderBox"></div></td>
+    <td><input type="text" id="r_value" style="width:37px;font-size:12px;" value="0" onchange="slider_r.setValue(this.value);this.value = slider_r.getValue();redraw();">
+</td>
+  </tr>
+  <tr></tr>
+    <tr>
+    <td><font color="Black">a, rhythmicity amplitude</font></td>
+    <td><div id="a_sliderBox"></div></td>
+    <td><input type="text" id="a_value" style="width:37px;font-size:12px;" value="0" onchange=
+    "slider_a.setValue(this.value);
+    this.value = slider_a.getValue();
+    redraw();">
+</td>
+  </tr>
+</table>
+<p></p>
+<p>
+<strong>Dynamic Figure 1:</strong>  Each of the 6 parameters can be individually controlled by a slider.  The overall falloff exponential (&#964) is shown in red converging to the baseline (b, grey dotted line).  About this, a sinusoid (purple) of frequency f oscillates, damped by a second exponential falloff (c, envelope shown by blue dotted lines).  Finally, skipping completes the distribution (s, thick black line).  The metric of rhythmicity we use is the initial amplitude of the modulation (a), which depends on r and b.
+</p>
+</div>
+
+
+</body>
+</html>
