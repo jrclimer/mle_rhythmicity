@@ -1,6 +1,0 @@
-function out = strjoin(C,delimiter)
-%% Implementation of strjoin
-    out = cellfun(@(x)[x delimiter],C,'UniformOutput',false);
-    out = cat(2,out{:});
-    out = out(1:end-numel(delimiter));
-end

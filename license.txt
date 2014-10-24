@@ -1,18 +1,3 @@
-mle_rhythhmicity
-================
-
-An improved method for examining neural single unit rhythmicity using maxmimun 
-likelihood estimation for a parametric distribution of lags.
-
-This code has been freely distributed by the authors under the BSD 
-licence (http://opensource.org/licenses/BSD-2-Clause). If used or
-modified, we would appreciate it if you cited our paper:
-
-Climer, J. R., DiTullio, R., Newman, E. L., Hasselmo, M. E., Eden, U. T. 
-(2014), Examination of rhythmicity of extracellularly recorded neurons in
-the entorhinal cortex. Hippocampus, Epub ahead of print. doi:
-10.1002/hipo.22383.
-
 Copyright (c) 2014, Trustees of Boston University
 All rights reserved.
 
