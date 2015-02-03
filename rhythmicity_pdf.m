@@ -56,7 +56,7 @@ function [f,inds,uqinds,inds2] = rhythmicity_pdf(varargin)
 % the entorhinal cortex. Hippocampus, Epub ahead of print. doi:
 % 10.1002/hipo.22383.
 persistent FIELDS
-
+persistent PARAMS
 if ~exist('FIELDS','var')||isempty(FIELDS)
     FIELDS = {'tau','b','c','f','s','r'};
 end
