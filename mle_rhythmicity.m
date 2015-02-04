@@ -99,7 +99,6 @@ x_ = x_(:);
 t0 = 0:dt:T;
 [~,inds] = histc(x_,t0);
 
-t=t0;
 
 %% Initial guess using particle swarm
 PopulationSize = 75;
@@ -122,8 +121,8 @@ phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'noskip',tru
 % Solve
 [noskip_phat,ci]  = mle(x_,'pdf',@(x,tau,b,c,f,r,varargin)rhythmicity_pdf('inds',inds,'phat',[tau b c f r],'noskip',true),....
         'start',phat0,....
-        'lowerbound',lbnd,....
-        'upperbound',ubnd,....
+        'lowerbound',[-inf 0 -inf 1 0],....
+        'upperbound',[inf 1 inf 13 1],....
         'alpha',0.05);
 noskip_LL = sum(log(rhythmicity_pdf('inds',inds,'phat',noskip_phat,'noskip',true)));
 
@@ -158,14 +157,14 @@ else % Need to do full fit
         'alpha',0.05);
     
     % Testing
-    LL = sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'t',t,'T',T)));
+    LL = sum(log(rhythmicity_pdf('inds',inds,'phat',phat)));
     
     D_sk = 2*(LL-noskip_LL);
     p_sk = 1-chi2cdf(D_sk,1);
 end
 
 % Arrhythmic fit
-flat_phat = mle(x_,'pdf',@(x,tau,b,varargin)rhythmicity_pdf('inds',inds,'phat',[tau,b,1,1,0,0],'t',t,'T',T),....
+flat_phat = mle(x_,'pdf',@(x,tau,b,varargin)rhythmicity_pdf('inds',inds,'phat',[tau,b,1,1,0,0]),....
         'start',phat(1:2),....
         'lowerbound',[-inf 0],....
         'upperbound',[inf 1],....
@@ -189,16 +188,16 @@ if plotit
        phat = [phat(1:end-1) 0 phat(end)]; 
     end
     
-    %ts = linspace(0,T,61);
+    ts = linspace(0,T,61);
     hist(x_,ts);
     xlim([min(ts) max(ts)]);
     
     hold on;
-    ps = rhythmicity_pdf('t',ts,'phat',phat,'t',t,'T',T);
+    ps = rhythmicity_pdf('t',ts,'phat',phat);
     ps = ps/sum(ps)*numel(x_);
     plot(ts,ps,'Color',[1 0 0],'LineWidth',2);
     
-    ps = rhythmicity_pdf_fast('t',ts,'phat',[phat(1:2) phat(3:end)*0],'t',t,'T',T);
+    ps = rhythmicity_pdf('t',ts,'phat',[phat(1:2) phat(3:end)*0]);
     ps = ps/sum(ps)*numel(x_);
     plot(ts,ps,'c--','LineWidth',2);
     hold off
