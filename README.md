@@ -4,6 +4,11 @@ mle_rhythhmicity
 An improved method for examining neural single unit rhythmicity using maxmimun 
 likelihood estimation for a parametric distribution of lags.
 
+Daniel Manson (d.manson.11@ucl.ac.uk) has adapted this code for PYTHON, it is
+available at https://gist.github.com/d1manson/f1d8907865298808941d . Note that
+it requires another file, available at: 
+https://gist.github.com/d1manson/40cbbb62a5f4ecc37bd7 .
+
 This code has been freely distributed by the authors under the BSD 
 licence (http://opensource.org/licenses/BSD-2-Clause). If used or
 modified, we would appreciate it if you cited our paper:
