@@ -1,7 +1,7 @@
-mle_rhythhmicity
+mle_rhythmicity
 ================
 
-An improved method for examining neural single unit rhythmicity using maxmimun 
+An improved method for examining neural single unit rhythmicity using maximum 
 likelihood estimation for a parametric distribution of lags.
 
 Daniel Manson (d.manson.11@ucl.ac.uk) has adapted this code for PYTHON, it is
