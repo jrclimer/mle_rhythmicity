@@ -11,6 +11,7 @@ function [ stats ] = mle_rhythmicity( x,session_dur,varargin )
 %   plotit (true): If true, plots histogram and distribution estimation
 %   noskip (false): If true, skipping removed from model.
 %   dt (0.001): dt for model
+%   f_range ([1 13]): Range of possible frequencies for the rhythmicity
 %
 % OUTPUT
 %   stats: Output structure of the fit
@@ -37,6 +38,8 @@ function [ stats ] = mle_rhythmicity( x,session_dur,varargin )
 %           noskip=true) r]
 %       x: Cell array of the lags following each spike
 %       x_: All lags
+%       R2: Cameron's pseudo R2 for the rhythmic fit over the flat fit
+%       R2_unif: Cameron's pseudo R2 for the rhythmic fit over the uniform
 %
 % RELEASE NOTES
 %   v0.1 2014-04-30 Updated from mle_rhythmicity
@@ -44,7 +47,7 @@ function [ stats ] = mle_rhythmicity( x,session_dur,varargin )
 %   v0.21 2014-05-06 Bug fixes with noskip=false
 %   v0.3 2014-07-27 Release for review
 %
-% Copyright (c) 2014, Trustees of Boston University
+% Copyright (c) 2014, 2015 Trustees of Boston University
 % All rights reserved.
 %
 % This file is part of mle_rhythmicity
@@ -69,6 +72,7 @@ ip.addParamValue('plotit',true);
 ip.addParamValue('noskip',false);
 ip.addParamValue('dt',0.001);
 ip.addParamValue('stats0',[]);
+ip.addParamValue('f_range',[1 13]);
 ip.parse(varargin{:});
 for j = fields(ip.Results)'
     eval([j{1} ' = ip.Results.' j{1} ';']);
@@ -99,15 +103,14 @@ x_ = x_(:);
 t0 = 0:dt:T;
 [~,inds] = histc(x_,t0);
 
-
 %% Initial guess using particle swarm
 PopulationSize = 75;
-lbnd = [-1 0 -1 1 0];
-ubnd = [1 1 1 13 1];
+lbnd = [-1 0 -1 f_range(1) 0];
+ubnd = [1 1 1 f_range(2) 1];
 InitialPopulation = rand(PopulationSize,numel(lbnd)).*repmat(ubnd-lbnd,[PopulationSize 1])+repmat(lbnd,[PopulationSize 1]);
 %
 % close all;
-phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'noskip',true))),size(lbnd,2) ...
+phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'noskip',true,'T',T,'dt',dt))),size(lbnd,2) ...
     ,[],[],[],[]...
     ,lbnd...
     ,ubnd...
@@ -119,12 +122,12 @@ phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'noskip',tru
     );
 
 % Solve
-[noskip_phat,ci]  = mle(x_,'pdf',@(x,tau,b,c,f,r,varargin)rhythmicity_pdf('inds',inds,'phat',[tau b c f r],'noskip',true),....
+[noskip_phat,ci]  = mle(x_,'pdf',@(x,tau,b,c,f,r,varargin)rhythmicity_pdf('inds',inds,'phat',[tau b c f r],'noskip',true,'T',T,'dt',dt),....
         'start',phat0,....
-        'lowerbound',[-inf 0 -inf 1 0],....
-        'upperbound',[inf 1 inf 13 1],....
+        'lowerbound',[-inf 0 -inf f_range(1) 0],....
+        'upperbound',[inf 1 inf f_range(2) 1],....
         'alpha',0.05);
-noskip_LL = sum(log(rhythmicity_pdf('inds',inds,'phat',noskip_phat,'noskip',true)));
+noskip_LL = sum(log(rhythmicity_pdf('inds',inds,'phat',noskip_phat,'noskip',true,'T',T,'dt',dt)));
 
 if noskip
     phat = noskip_phat;
@@ -138,7 +141,7 @@ else % Need to do full fit
     InitialPopulation = [InitialPopulation rand(PopulationSize,1)];
     
 %     close all;
-    phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat))),size(lbnd,2) ...
+    phat0 = pso(@(phat)-sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'T',T,'dt',dt))),size(lbnd,2) ...
         ,[],[],[],[]...
         ,lbnd...
         ,ubnd...
@@ -150,33 +153,33 @@ else % Need to do full fit
         );
     
     % fit
-    [phat,ci] = mle(x_,'pdf',@(x,tau,b,c,f,s,r,varargin)rhythmicity_pdf('inds',inds,'phat',[tau b c f s r]),....
+    [phat,ci] = mle(x_,'pdf',@(x,tau,b,c,f,s,r,varargin)rhythmicity_pdf('inds',inds,'phat',[tau b c f s r],'T',T,'dt',dt),....
         'start',phat0,....
-        'lowerbound',[-inf 0 -inf 1 0 0],....
-        'upperbound',[inf 1 inf 13 1 1],....
+        'lowerbound',[-inf 0 -inf f_range(1) 0 0],....
+        'upperbound',[inf 1 inf f_range(2) 1 1],....
         'alpha',0.05);
     
     % Testing
-    LL = sum(log(rhythmicity_pdf('inds',inds,'phat',phat)));
+    LL = sum(log(rhythmicity_pdf('inds',inds,'phat',phat,'T',T,'dt',dt)));
     
     D_sk = 2*(LL-noskip_LL);
     p_sk = 1-chi2cdf(D_sk,1);
 end
 
 % Arrhythmic fit
-flat_phat = mle(x_,'pdf',@(x,tau,b,varargin)rhythmicity_pdf('inds',inds,'phat',[tau,b,1,1,0,0]),....
+flat_phat = mle(x_,'pdf',@(x,tau,b,varargin)rhythmicity_pdf('inds',inds,'phat',[tau,b,1,1,0,0],'T',T,'dt',dt),....
         'start',phat(1:2),....
         'lowerbound',[-inf 0],....
         'upperbound',[inf 1],....
         'optimfun','fmincon',...
         'alpha',0.05);
-flat_LL = sum(log(rhythmicity_pdf('inds',inds,'phat',[flat_phat,1,1,0,0])));
+flat_LL = sum(log(rhythmicity_pdf('inds',inds,'phat',[flat_phat,1,1,0,0],'T',T,'dt',dt)));
 %% More testing
 D_rhyth = 2*(LL-flat_LL);
 p_rhyth = 1-chi2cdf(D_rhyth,size(lbnd,2)-2);
 
 %% Amplitude stuff
-[a,aci] = mle(x_,'pdf',@(x,a,varargin)rhythmicity_pdf('inds',inds,'phat',[phat(1:end-1) a/(1-phat(2))],'noskip',noskip),...
+[a,aci] = mle(x_,'pdf',@(x,a,varargin)rhythmicity_pdf('inds',inds,'phat',[phat(1:end-1) a/(1-phat(2))],'noskip',noskip,'T',T,'dt',dt),...
     'start',(1-phat(2))*phat(end),...
     'lowerbound',0,....
     'upperbound',1-phat(2));
@@ -197,7 +200,7 @@ if plotit
     ps = ps/sum(ps)*numel(x_);
     plot(ts,ps,'Color',[1 0 0],'LineWidth',2);
     
-    ps = rhythmicity_pdf('t',ts,'phat',[phat(1:2) phat(3:end)*0]);
+    ps = rhythmicity_pdf('t',ts,'phat',[phat(1:2) phat(3:end)*0],'T',T,'dt',dt);
     ps = ps/sum(ps)*numel(x_);
     plot(ts,ps,'c--','LineWidth',2);
     hold off
