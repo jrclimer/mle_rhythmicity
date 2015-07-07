@@ -42,7 +42,7 @@ x = {};
 for i=1:size(epochs,1)
     x1 = spk_ts(spk_ts>=epochs(i,1)&spk_ts<epochs(i,2)-dt);
     x2 = spk_ts(spk_ts>=epochs(i,1)&spk_ts<epochs(i,2));
-    x = [x;arrayfun(@(y)x2(x2>y&x2<=y+T),x1,'UniformOutput',false)];
+    x = [x;arrayfun(@(y)x2(x2>y&x2<=y+T)-y,x1,'UniformOutput',false)];
 end
 
 T = sum(diff(epochs,[],2));
