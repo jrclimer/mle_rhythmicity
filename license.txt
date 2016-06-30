@@ -1,3 +1,16 @@
+mle_rhythmicity
+================
+This code has been freely distributed by the authors under the BSD 
+licence (http://opensource.org/licenses/BSD-2-Clause). If used or
+modified, we would appreciate it if you cited our papers:
+
+Climer JR, DiTullio R, Newman EL, Hasselmo ME, Eden UT. (2014),
+Examination of rhythmicity of extracellularly recorded neurons in the
+entorhinal cortex. Hippocampus, 25:460-473. doi: 10.1002/hipo.22383.
+
+Hinman et al., Multiple Running Speed Signals in Medial Entorhinal
+Cortex, Neuron (2016). http://dx.doi.org/10.1016/j.neuron.2016.06.027
+
 Copyright (c) 2014, Trustees of Boston University
 All rights reserved.
 

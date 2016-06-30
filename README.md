@@ -1,44 +1,31 @@
 mle_rhythmicity
 ================
+Welcome to mle_rhythmicity!
 
-An improved method for examining neural single unit rhythmicity using maximum 
-likelihood estimation for a parametric distribution of lags.
+mle_rhythmicity is a set of MATLAB tools for analyzing the rhythmicity of 
+event times. It was specifically developed for the analysis of theta 
+(10 Hz) rhythmic neurons, where the most common existing methods rely on 
+the binned event-time autocorrelogram. There are a number of problems with 
+this technique (Climer et. al., 2015), and to overcome them we developed a 
+parametric conditional-intensity function for the lags in the 
+autocorrelogram window. This is considerably less biased than existing 
+techniques, and allows us to do more rigorous statistics such as parameter 
+estimation using the maximum-likelihood approach and to examine if 
+features of rhythmicity are modulated by other covariates 
+(Hinman et. al., in press).
 
-Daniel Manson (d.manson.11@ucl.ac.uk) has adapted this code for PYTHON, it is
-available at https://gist.github.com/d1manson/f1d8907865298808941d . Note that
-it requires another file, available at: 
-https://gist.github.com/d1manson/40cbbb62a5f4ecc37bd7 .
+The main two functions are mle_rhythmicity (which estimates rhythmicity 
+parameters when we assume the average underlying rhythmicity is constant)
+and rhythmicity_covar (which estimates rhythmicity parameters when some are
+allowed to shift with a covariate). For more details, please see the 
+documentation in the matlab files (doc mle_rhythmicity).
 
-This code has been freely distributed by the authors under the BSD 
-licence (http://opensource.org/licenses/BSD-2-Clause). If used or
-modified, we would appreciate it if you cited our paper:
+Please raise issues using the issue mechanic in the GitHub repo, or contact 
+Dr. Jason Climer via email at jason.r.climer@gmail.com. 
 
-Climer, J. R., DiTullio, R., Newman, E. L., Hasselmo, M. E., Eden, U. T. 
-(2014), Examination of rhythmicity of extracellularly recorded neurons in
-the entorhinal cortex. Hippocampus, Epub ahead of print. doi:
-10.1002/hipo.22383.
+This is a major update to the mle_rhythmicity toolset. If you'd like to get 
+back to the latest version of the old code it is in the last committed 
+version of the previous revision is the SHA starting with 93862ac...
 
-Copyright (c) 2014, Trustees of Boston University
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, 
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright 
-notice, this list of conditions and the following disclaimer in the 
-documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS I
-NTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
+Copyright (c) 2015-2016 Trustees of Boston University
+All rights reserved
