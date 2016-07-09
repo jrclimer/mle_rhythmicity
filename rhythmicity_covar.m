@@ -48,6 +48,7 @@ PARAMS = {'tau','b','c','f','s','r'};% List of parameters - used for easier codi
 display = [];
 
 ip = inputParser;
+warning('off','stats:mle:EvalLimit');
 
 % mle_rhythmicity params
 ip.addParamValue('max_lag', 0.6);
@@ -114,14 +115,19 @@ for i=1:numel(PARAMS)
     end
 end
 
+PARAMS = [PARAMS {'a'}];
 for i=1:numel(PARAMS)
     for j=1:numel(post_hocs.(PARAMS{i}))
+        if ~iscell(post_hocs.(PARAMS{i}))
+           post_hocs.(PARAMS{i})= {post_hocs.(PARAMS{i})};
+        end
         if ~isempty(post_hocs.(PARAMS{i}){j})&&~isequal(post_hocs.(PARAMS{i}){j},sort(unique(post_hocs.(PARAMS{i}){j})))
             post_hocs.(PARAMS{i}){j}=sort(unique(post_hocs.(PARAMS{i}){j}));
             warning(['post_hocs.' PARAMS{i} ' not unique/sorted. Output may not be the same shape as the input']);
-        end
+        end        
     end
 end
+PARAMS = PARAMS(1:end-1);
 
 if ismember('a',fields(post_hocs))
     post_hocs.r = post_hocs.a;
@@ -507,6 +513,7 @@ if HOLD
 else
     hold off;
 end
+save working.mat;
 if plotit(2)
     plot_rhythmicity_covar( everything, plot_axis, 'covar_label', covar_labels{plot_axis} );
 end

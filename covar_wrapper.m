@@ -43,8 +43,7 @@ if ~exist('asa','var')
 end
 
 if asa
-    PARAMS = [PARAMS(2:end) PARAMS(1)];
-    phat = [phat(numel(cov.r)+1:end) phat(1:numel(cov.r))/(1-phat(numel(cov.r)+1))];
+    phat = [phat(numel(cov.r)+1:end) phat(1:numel(cov.r))/(1-phat(numel(cov.r)+numel(cov.tau)+1))];
 end
 
 vect = @(x)x(:);
@@ -62,8 +61,6 @@ out(~cellfun(@(x)isequal(cov.(x),0),PARAMS)) = ...
     ,find(~cellfun(@(x)isequal(cov.(x),0),PARAMS))...
     ,'UniformOutput',false...
     );
-
-
 
 end
 

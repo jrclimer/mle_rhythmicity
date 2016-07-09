@@ -161,13 +161,16 @@ A = ones(numel(x),1)*mean(everything.covars_list);
 A(:,plot_axis+1) = y(:);
 
 % Plot
-imagesc(LAGBINS,COVARBINS,reshape(passall(@(varargin)cif_fun(x(:),varargin{:})./cif_int(everything.max_lag,varargin{:}),...
-covar_wrapper(everything.phat,everything.cov,A,PARAMS,true)),size(x)));
+temp = reshape(...
+    passall(@(varargin)...
+    cif_fun(x(:),varargin{:})...
+    ,covar_wrapper(everything.phat,everything.cov,A,true))...
+    ,size(x));
+temp = diag(sum(temp,2).^-1)*temp;
+imagesc(LAGBINS,COVARBINS,temp);
 set(gca,'YDir','normal');
 xlabel('Lag (s)');ylabel(covar_label);
 title('Relative likelihood');
-
-axes(ax);
 
 end
 
