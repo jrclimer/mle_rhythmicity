@@ -65,7 +65,7 @@ data.spike_speed = interp1(data.ts,data.speed,data.spike_ts);
     ... DEFINE WHICH PARAMETERS COVARY WITH WHICH COVARIATES
     ,'f_covar',[0 1] ... Defines the rhythmicity frequency as able to covary with the speed (1) and be offset by y-intercept (0)
     ,'tau_covar',[0 1] ... Defines the rhythmicity falloff as able to covary with the speed (1) and be offset by y-intercept (0)
-    ,'a_covar',[0 1] ... Defines the rhythmicity amplitude as able to covary with the speed (1) and be offset by y-intercept (0)
+    ,'a_covar',[0 1] ... Defines the rhythmicity falloff as able to covary with the speed (1) and be offset by y-intercept (0)
     ...
     ... OTHER STATISTICS TO RUN
     ,'post_hocs',struct('f',1,'a',1) ... Run post-hoc tests for the speed-frequency and speed-amplitude tuning
