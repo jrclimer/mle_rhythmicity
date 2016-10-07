@@ -69,10 +69,13 @@ if isnumeric(covar_label)
    covar_label = everything.covar_labels{covar_label}; 
 end
 
-PARAMS = {'r','tau','b','c','f','s'};% List of parameters - used for easier coding
+PARAMS = {'r','tau','b','c','f','s','v'};% List of parameters - used for easier coding
 % If noskip, drop s from PARAMS
 if everything.noskip
     PARAMS = PARAMS(~ismember(PARAMS,'s'));
+end
+if ~everything.refractory_rise
+    PARAMS = PARAMS(~ismember(PARAMS,'v'));
 end
 
 % Subplotting
@@ -150,12 +153,20 @@ LAGBINS = linspace(0,everything.max_lag,(numel(LAGBINS)-1)*2);
 [x,y] = meshgrid(LAGBINS,COVARBINS);
 
 % Get cif
+% Generate CIFs and CIF integral functions
 if everything.noskip
-    [cif_fun, cif_int] = cif_generator('noskip');
+    if everything.refractory_rise
+        [cif_fun, ~] = cif_generator('noskip_rise');
+    else
+    [cif_fun, ~] = cif_generator('noskip');
+    end
 else
-    [cif_fun, cif_int] = cif_generator('full');
+    if everything.refractory_rise
+         [cif_fun, ~] = cif_generator('full_rise');
+    else
+    [cif_fun, ~] = cif_generator('full');
+    end
 end
-
 % Make design matrix
 A = ones(numel(x),1)*mean(everything.covars_list);
 A(:,plot_axis+1) = y(:);

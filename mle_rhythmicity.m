@@ -14,6 +14,8 @@ function [params, confidence, stats, everything] = mle_rhythmicity( data, sessio
 %       max_lag (0.6): Examination window (seconds)
 %       plotit (true): If true, plots histogram and distribution estimates
 %       noskip (false): If true, omits skipping from the model
+%       refactory_rise (false): If true, adds an exponential rise time
+%           constant (v)
 %       f_range ([1 13]): Range of possible frequencies for the rhythmicity.
 %       alpha (0.05): Cutoff for confidence intervals
 %       t_axis (linspace(0,maxlag,61)): Axis for plotting
@@ -29,6 +31,8 @@ function [params, confidence, stats, everything] = mle_rhythmicity( data, sessio
 %           f (Hz) - Frequency of the rhythmicity
 %           s - Relative heights of the secondary peaks. Not present if
 %               noskip=true
+%           v - Half-rise time for the exponential refractory rise (sec).
+%               Not present if refactory_rise=false.
 %       confidence: Struct containing confidence intervals of the parameters
 %       stats: Struct containing
 %           deviance_rhythmic - Deviance for the rhythmicity test. If
@@ -58,7 +62,7 @@ function [params, confidence, stats, everything] = mle_rhythmicity( data, sessio
 %               vector. Not present if noskip=true.
 %
 % See also cif_generator, epoch_data, rhythmicity_pdf, rhythmicity_covar
-% 
+%
 % Copyright 2015-2016 Trustees of Boston University
 % All rights reserved.
 %
@@ -92,6 +96,7 @@ ip.addParamValue('epochs',[]);
 ip.addParamValue('epochmode','lead');
 ip.addParamValue('plotit',true);
 ip.addParamValue('noskip',false);
+ip.addParamValue('refactory_rise',false);
 ip.addParamValue('f_range',[1 13]);
 ip.addParamValue('alpha',0.05);
 ip.addParamValue('t_axis',[ ]);
@@ -142,8 +147,8 @@ else % A single run
     if ~iscell(data)
         if isempty(epochs)
             epochs = [0 session_duration];
-        end        
-        [ lags, inds ] = epoch_data( data, epochs ,'epochmode', epochmode, 'max_lag', max_lag);        
+        end
+        [ lags, inds ] = epoch_data( data, epochs ,'epochmode', epochmode, 'max_lag', max_lag);
     end
     
     lags_list = cat(1,lags{:});
@@ -190,15 +195,26 @@ else % A single run
         unifrnd(0.25,0.75,[PopulationSize,1]) ...r
         ];
     
-    [cif_fun, cif_int] = cif_generator('noskip');
-    
+    if refactory_rise
+       InitialPopulation = [InitialPopulation(:,1:end-1)...
+           unifrnd(0,max_lag,[PopulationSize 1])...v
+           InitialPopulation(:,end)];
+       [cif_fun, cif_int] = cif_generator('noskip_rise');
+           lb = 0;
+           ub = inf;
+           
+    else
+        [cif_fun, cif_int] = cif_generator('noskip');
+        lb = [];
+        ub = [];
+    end
     % Particle swarm fit
     phat_noskip = pso(...
         @(phat)-passall(@(varargin)LL_fun(cif_fun,cif_int,varargin{:}),phat)...
-        ,5 ...
+        ,5+refactory_rise ...
         ,[],[],[],[]...
-        ,[-inf 0 -inf f_range(1) 0]...
-        ,[inf 0.5 inf f_range(2) 1]...
+        ,[-inf 0 -inf f_range(1) lb 0]...
+        ,[inf 0.5 inf f_range(2) ub 1]...
         ,[] ...
         ,psooptimset('Display','off','Generations',100,'InitialPopulation',InitialPopulation,'PopulationSize',PopulationSize,'ConstrBoundary','Reflect'...
         ...,'PlotFcns',{@psoplotswarm}...
@@ -208,44 +224,62 @@ else % A single run
     % Final convergence with mle
     phat_noskip = mle(1,'logpdf',@(~,varargin)LL_fun(cif_fun,cif_int,varargin{:})...
         ,'start',phat_noskip...
-        ,'lowerbound',[-inf 0 -inf f_range(1) 0]...
-        ,'upperbound',[inf 1 inf f_range(2) 1]);
+        ,'lowerbound',[-inf 0 -inf f_range(1) lb 0]...
+        ,'upperbound',[inf 1 inf f_range(2) ub 1]);
     
     %%
     % % Fit using non-skipping distribution
     
     % Convert to A & calculate CIs, log-likelihood
-%     keyboard
+    %     keyboard
     phat_noskip = [(1-phat_noskip(2))*phat_noskip(end) phat_noskip(1:end-1)];
-    se_noskip = (diag(mlecov(phat_noskip,1,'logpdf',@(~,a,tau,b,c,f)LL_fun(cif_fun,cif_int,tau,b,c,f,(1-b)*a))))';
+    se_noskip = (diag(mlecov(phat_noskip,1,'logpdf',@(~,a,varargin)LL_fun(cif_fun,cif_int,varargin{:},a/(1-varargin{2})))))';
     ci_noskip = [-1;1]*se_noskip*norminv(1-alpha/2)+repmat(phat_noskip,[2 1]);
-    LL_noskip = passall(@(a,tau,b,c,f)LL_fun(cif_fun,cif_int,tau,b,c,f,a/(1-b)),phat_noskip);
-    
+    LL_noskip = passall(@(a,varargin)LL_fun(cif_fun,cif_int,varargin{:},a/(1-varargin{2})),phat_noskip);
+            
     if ~noskip % Add skipping
-        [cif_fun, cif_int] = cif_generator('full');
+        
+        if refactory_rise
+            phat = [phat_noskip(2:end-1) 0.05 phat_noskip(end) phat_noskip(1)/(1-phat_noskip(3))];
+            
+            lb = 0;
+            ub = max_lag/4;
+            
+            [cif_fun, cif_int] = cif_generator('full_rise');            
+        else
+            phat = [phat_noskip(2:end) 0.05 phat_noskip(1)/(1-phat_noskip(3))];
+            [cif_fun, cif_int] = cif_generator('full');
+            
+            lb = [];
+            ub = [];          
+            
+        end
+        
         phat = mle(1,'logpdf',@(~,varargin)LL_fun(cif_fun,cif_int,varargin{:})...
-            ,'start',[phat_noskip(2:end) 0.05 phat_noskip(1)/(1-phat_noskip(3))]...
-            ,'lowerbound',[-inf 0 -inf f_range(1) 0 0]...
-            ,'upperbound',[inf 1 inf f_range(2) 1 1]);
-        LL = passall(@(varargin)LL_fun(cif_fun,cif_int,varargin{:}),phat);
+            ,'start',phat...
+            ,'lowerbound',[-inf 0 -inf f_range(1) 0 lb 0]...
+            ,'upperbound',[inf 1 inf f_range(2) 1 ub 1]);
+        
+        quadgk(@(t)passall(@(varargin)cif_fun(t,varargin{:}),phat),0,0.6)
+        passall(@(varargin)cif_int(0.6,varargin{:}),phat)
         
         if phat_noskip(5)*2<=f_range(2)% If doubling the frequency is still in the frequency range
             %  Fit using a doubled frequency and high skipping
             phat_half = mle(1,'logpdf',@(~,varargin)LL_fun(cif_fun,cif_int,varargin{:})...
                 ,'start',[phat_noskip(2:4) phat_noskip(5)*2 0.95 phat_noskip(1)/(1-phat_noskip(3))]...
-                ,'lowerbound',[-inf 0 -inf f_range(1) 0 0]...
-                ,'upperbound',[inf 1 inf f_range(2) 1 1]);
+                ,'lowerbound',[-inf 0 -inf f_range(1) 0 lb 0]...
+                ,'upperbound',[inf 1 inf f_range(2) 1 ub 1]);
             LL_half = passall(@(varargin)LL_fun(cif_fun,cif_int,varargin{:}),phat_half);
             if LL_half>LL % If doubling the frequency is a better fit, replace
                 phat = phat_half;
             end
         end
-        
+                
         % Convert to A and calculate CIs, log-likelihood
         phat = [(1-phat(2))*phat(end) phat(1:end-1)];
-        se = (diag(mlecov(phat,1,'logpdf',@(~,a,tau,b,c,f,s)LL_fun(cif_fun,cif_int,tau,b,c,f,s,(1-b)*a))))';
+        se = (diag(mlecov(phat,1,'logpdf',@(~,a,varargin)LL_fun(cif_fun,cif_int,varargin{:},a/(1-varargin{2})))))';
         ci = [-1;1]*se*norminv(1-alpha/2)+repmat(phat,[2 1]);
-        LL = passall(@(a,tau,b,c,f,s)LL_fun(cif_fun,cif_int,tau,b,c,f,s,a/(1-b)),phat);
+        LL = passall(@(a,varargin)LL_fun(cif_fun,cif_int,varargin{:},a/(1-varargin{2})),phat);
         
         % Test for significant skipping
         stats.deviance_skipping = 2*(LL-LL_noskip);
@@ -268,6 +302,9 @@ else % A single run
     %% Package output
     PARAM = {'a','tau','b','c','f'};
     if ~noskip, PARAM = [PARAM {'s'}]; end
+    if refactory_rise
+        PARAM = [PARAM {'s'}];
+    end
     for j=1:numel(PARAM)
         eval(sprintf('params.%s=phat(%i);',PARAM{j},j));
         eval(sprintf('confidence.%s=ci(:,%i);',PARAM{j},j));
@@ -277,7 +314,7 @@ else % A single run
     if ~noskip, PARAM = [PARAM {'LL_noskip','phat_noskip','se_noskip'}]; end
     for j=1:numel(PARAM)
         eval(sprintf('everything.%s=%s;',PARAM{j},PARAM{j}));
-    end    
+    end
 end
 
 %% plotting
@@ -298,10 +335,20 @@ if plotit(1)
     bar(mean([t_axis(1:end-1);t_axis(2:end)]),b(1:end-1),1);
     xlim([0 max_lag]);
     hold on;
+    if ~refactory_rise
+        adj = 1;
     if noskip
         [cif_fun, cif_int] = cif_generator('noskip');
     else
         [cif_fun, cif_int] = cif_generator('full');
+    end
+    else
+        adj=2;
+        if noskip
+        [cif_fun, cif_int] = cif_generator('noskip_rise');
+    else
+        [cif_fun, cif_int] = cif_generator('full_rise');
+    end
     end
     ps = passall(@(varargin)cif_fun(linspace(0,max_lag,200),varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat)/...
         passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat);
@@ -313,7 +360,11 @@ if plotit(1)
     ttl = ['\hat{a}' sprintf('=%2.2g, p',everything.phat(1)) '_{rhyth}=' sprintf('%2.2g',stats.p_rhythmic)];
     lgnd = {'data','MLE','flat'};
     if ~noskip
+        if ~refactory_rise
         [cif_fun, cif_int] = cif_generator('noskip');
+        else
+           [cif_fun, cif_int] = cif_generator('noskip_rise'); 
+        end
         ps = passall(@(varargin)cif_fun(linspace(0,max_lag,200),varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip)/...
             passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip);
         plot(linspace(0,max_lag,200),ps*max_lag*numel(everything.lags_list)/tn,'g--');

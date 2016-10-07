@@ -13,6 +13,7 @@ function [ lambda ] = rhythmicity_pdf(varargin)
 %   c (log10(sec)): Falloff rate of rhythmicity magnitude
 %   f (Hz): Frequency of rhythmicity
 %   s: Skipping (optional)
+%   v: 1/2 rise time of the refractory rise (optional)
 %   r: Rhythmicity
 %
 %   tau-r must be scalars or vectors of the same size as lags.

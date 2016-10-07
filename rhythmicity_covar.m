@@ -43,7 +43,7 @@ function [ params, confidence, stats, everything ] = rhythmicity_covar( data, se
 % entorhinal cortex. Hippocampus, 25:460-473. doi: 10.1002/hipo.22383.
 
 %% Parse input
-PARAMS = {'tau','b','c','f','s','r'};% List of parameters - used for easier coding
+PARAMS = {'tau','b','c','f','s','v','r'};% List of parameters - used for easier coding
 
 display = [];
 
@@ -55,6 +55,7 @@ ip.addParamValue('max_lag', 0.6);
 ip.addParamValue('epochs',[]);
 ip.addParamValue('epochmode','lead');
 ip.addParamValue('noskip',false);
+ip.addParamValue('refactory_rise',false);
 ip.addParamValue('f_range',[1 13]);
 ip.addParamValue('alpha',0.05);
 ip.addParamValue('t_axis',[ ]);
@@ -85,6 +86,9 @@ end
 % If noskip, drop s from PARAMS
 if noskip
     PARAMS = PARAMS(~ismember(PARAMS,'s'));
+end
+if ~refactory_rise
+    PARAMS = PARAMS(~ismember(PARAMS,'v'));
 end
 
 cov = struct;% Struct of covariate indicies
@@ -238,9 +242,17 @@ LL_fun = @(cif_fun,cif_int,varargin)infbnd(sum(log(cif_fun(lags_list,varargin{:}
 
 % Generate CIFs and CIF integral functions
 if noskip
+    if refractory_rise
+        [cif_fun, cif_int] = cif_generator('noskip_rise');
+    else
     [cif_fun, cif_int] = cif_generator('noskip');
+    end
 else
+    if refractory_rise
+         [cif_fun, cif_int] = cif_generator('full_rise');
+    else
     [cif_fun, cif_int] = cif_generator('full');
+    end
 end
 
 % Make fit bounds
@@ -249,6 +261,10 @@ upperbound = [inf 1 inf everything0.phat(5)*2 1];
 if ~noskip
     lowerbound = [lowerbound 0];
     upperbound = [upperbound 1];
+end
+if refractory_rise
+   lowerbound = [lowerbound(1:end-1) 0 lowerbound(end)];
+   upperbound = [upperbound(1:end-1) inf upperbound(end)];
 end
 %%
 % Make initial guess & large bounds
@@ -491,6 +507,7 @@ everything.lags_list = lags_list;
 everything.covars_list = covars_list;
 everything.max_lag = max_lag;
 everything.noskip = noskip;
+everything.refractory_rise = refractory_rise;
 everything.session_duration = session_duration;
 everything.LL0 = everything0.LL;
 everything.cov = cov;
