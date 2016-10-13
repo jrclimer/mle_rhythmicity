@@ -260,8 +260,7 @@ else % A single run
             ,'lowerbound',[-inf 0 -inf f_range(1) 0 lb 0]...
             ,'upperbound',[inf 1 inf f_range(2) 1 ub 1]);
         
-        quadgk(@(t)passall(@(varargin)cif_fun(t,varargin{:}),phat),0,0.6)
-        passall(@(varargin)cif_int(0.6,varargin{:}),phat)
+        LL = passall(@(varargin)LL_fun(cif_fun,cif_int,varargin{:}),phat);
         
         if phat_noskip(5)*2<=f_range(2)% If doubling the frequency is still in the frequency range
             %  Fit using a doubled frequency and high skipping

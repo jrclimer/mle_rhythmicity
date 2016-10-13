@@ -55,7 +55,7 @@ ip.addParamValue('max_lag', 0.6);
 ip.addParamValue('epochs',[]);
 ip.addParamValue('epochmode','lead');
 ip.addParamValue('noskip',false);
-ip.addParamValue('refactory_rise',false);
+ip.addParamValue('refractory_rise',false);
 ip.addParamValue('f_range',[1 13]);
 ip.addParamValue('alpha',0.05);
 ip.addParamValue('t_axis',[ ]);
@@ -87,7 +87,7 @@ end
 if noskip
     PARAMS = PARAMS(~ismember(PARAMS,'s'));
 end
-if ~refactory_rise
+if ~refractory_rise
     PARAMS = PARAMS(~ismember(PARAMS,'v'));
 end
 
@@ -530,7 +530,6 @@ if HOLD
 else
     hold off;
 end
-save working.mat;
 if plotit(2)
     plot_rhythmicity_covar( everything, plot_axis, 'covar_label', covar_labels{plot_axis} );
 end
