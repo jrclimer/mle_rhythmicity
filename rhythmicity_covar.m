@@ -186,12 +186,13 @@ if isequal(display,'verbose')
 end
 
 % Static fit
+if any(plot), HOLD = ishold; end
+
 if plotit(1)% Static plotting
     if any(cellfun(@(x)isequal(x,'plotit'),varargin))
         varargin = varargin([1:find(cellfun(@(x)isequal(x,'plotit'),varargin))-1 find(cellfun(@(x)isequal(x,'plotit'),varargin))+2:end]);
     end
-    pos = get(gca,'position');
-    HOLD = ishold;
+    pos = get(gca,'position');    
     if ~HOLD
         cla;
         axis off
