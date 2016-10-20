@@ -42,6 +42,10 @@ switch funname
     case 'flat'% Non-rhythmic
         cif = @(t,tau,b)(1-b)*exp(-t*10^-tau)+b;
         cif_int = @(t,tau,b)10^tau*(1-b)*(1-exp(-t*10^-tau))+b*t;
+    case 'flat_rise'% Not-rhythmic with an exponential rise
+        cif = @(t,tau,b,v)((1-b)*exp(-t*10^-tau)+b).*(1-2.^(-t/v));
+        cif_int = @(t,tau,b,v)b*t+(b-1)*10^tau*exp(-t*10^-tau)+b*2.^(-t/v)*v/log(2)+(1-b)*2^(-t/v)*exp(-t*10^-tau)*v/(10^-tau*v+log(2));
+        cif_int = @(t,tau,b,v)cif_int(t,tau,b,v)-cif_int(0,tau,b,v);
     case 'pure'% Pure sinusoid
         cif = @(t,f)cos(2*pi*f*t)+1;
         cif_int = @(t,f)sin(2*pi*f*t)/(2*pi*f)+t;
