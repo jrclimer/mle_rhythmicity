@@ -310,7 +310,7 @@ else % A single run
     PARAM = {'a','tau','b','c','f'};
     if ~noskip, PARAM = [PARAM {'s'}]; end
     if refractory_rise
-        PARAM = [PARAM {'s'}];
+        PARAM = [PARAM {'v'}];
     end
     for j=1:numel(PARAM)
         eval(sprintf('params.%s=phat(%i);',PARAM{j},j));
@@ -358,10 +358,7 @@ if plotit(1)
     ps = passall(@(varargin)cif_fun(linspace(0,max_lag,200),varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat)/...
         passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat);
     
-    z = quadgk(@(t)passall(@(varargin)cif_fun(t,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat),0,max_lag)/passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat);
-    if z<0.95|z>1.05
-        keyboard
-    end
+   
     
     plot(linspace(0,max_lag,200),ps*max_lag*numel(everything.lags_list)/tn,'r','LineWidth',2);
     if ~refractory_rise
@@ -372,11 +369,7 @@ if plotit(1)
     
     ps = passall(@(varargin)cif_fun(linspace(0,max_lag,200),varargin{:}),everything.phat_flat)/...
         passall(@(varargin)cif_int(max_lag,varargin{:}),everything.phat_flat);
-    z = quadgk(@(t)passall(@(varargin)cif_fun(t,varargin{:}),everything.phat_flat),0,max_lag)/passall(@(varargin)cif_int(max_lag,varargin{:}),everything.phat_flat)
-    if z<0.95|z>1.05
-        keyboard
-    end
-    
+        
     plot(linspace(0,max_lag,200),ps*max_lag*numel(everything.lags_list)/tn,'c--','LineWidth',2);
     ttl = ['\hat{a}' sprintf('=%2.2g, p',everything.phat(1)) '_{rhyth}=' sprintf('%2.2g',stats.p_rhythmic)];
     lgnd = {'data','MLE','flat'};
@@ -388,12 +381,7 @@ if plotit(1)
         end
         ps = passall(@(varargin)cif_fun(linspace(0,max_lag,200),varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip)/...
             passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip);
-        
-        z = quadgk(@(t)passall(@(varargin)cif_fun(t,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip),0,max_lag)/passall(@(varargin)cif_int(max_lag,varargin{2:end},varargin{1}/(1-varargin{3})),everything.phat_noskip);
-        if z<0.95|z>1.05
-            keyboard
-        end
-        
+              
         plot(linspace(0,max_lag,200),ps*max_lag*numel(everything.lags_list)/tn,'g--');
         
         ttl = [ttl ', s=' sprintf('%2.2g',everything.phat(end)) ', p_{skip}=' sprintf('%2.2g',stats.p_skipping)];

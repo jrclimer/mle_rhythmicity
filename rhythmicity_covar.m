@@ -186,7 +186,7 @@ if isequal(display,'verbose')
 end
 
 % Static fit
-if any(plot), HOLD = ishold; end
+if any(plotit), HOLD = ishold; end
 
 if plotit(1)% Static plotting
     if any(cellfun(@(x)isequal(x,'plotit'),varargin))
